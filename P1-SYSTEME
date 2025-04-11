@@ -1,0 +1,90 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Apr 11 11:16:02 2025
+
+@author: marni
+"""
+import numpy as np
+import matplotlib.pyplot as plt
+
+alpha = 0.7
+beta = 0.4
+N = 300
+dt = 0.1
+
+def f(y):
+    S, M, G = y
+    dS = -alpha * S
+    dM = alpha * S - beta * M
+    dG = beta * M
+    return np.array([dS, dM, dG])
+
+def euler():
+    y = np.array([N - 1, 1, 0])  # [S, M, G]
+    t = np.array([0])
+    Y = [y.copy()]
+
+    while y[1] >= 0.01:
+        y = y + dt * f(y)
+        t=np.append(t,t[-1] + dt)
+        Y.append(y.copy())
+
+    Y = np.array(Y)
+    return t, Y[:, 0], Y[:, 1], Y[:, 2]
+
+def rk2():
+    y = np.array([N - 1, 1, 0])  # [S, M, G]
+    t = np.array([0])
+    Y = [y.copy()]
+
+    while y[1] >= 0.01:
+        y = y + dt * f(y+dt/2*f(y))
+        t=np.append(t,t[-1] + dt)
+        Y.append(y.copy())
+
+    Y = np.array(Y)
+    return t, Y[:, 0], Y[:, 1], Y[:, 2]
+
+
+t_e, S_e, M_e, G_e = euler()
+t_rk, S_rk, M_rk, G_rk = rk2()
+
+fig, (axm,axg,axs) = plt.subplots(1,3,figsize = (15,4))
+axm.plot(t_e, M_e, label="Malades (Euler)", linestyle="--")
+axm.plot(t_rk, M_rk, label="Malades (RK2)", linestyle="-")
+axm.set_title("Malades Euler vs RK2")
+axm.set_xlabel("Temps (jours)")
+axm.set_ylabel("Nombre de malades")
+axm.legend()
+axm.grid()
+
+axg.plot(t_e, G_e, label="Guéris (Euler)", linestyle="--")
+axg.plot(t_rk, G_rk, label="Guéris (RK2)", linestyle="-")
+axg.set_title("Guéris Euler vs RK2")
+axg.set_xlabel("Temps (jours)")
+axg.set_ylabel("Nombre de guéris")
+axg.legend()
+axg.grid()
+
+axs.plot(t_e, S_e, label="Sains (Euler)", linestyle="--")
+axs.plot(t_rk, S_rk, label="Sains (RK2)", linestyle="-")
+axs.set_title("Sains Euler vs RK2")
+axs.set_xlabel("Temps (jours)")
+axs.set_ylabel("Nombre de sains")
+axs.legend()
+axs.grid()
+
+plt.show()
+
+# Résultats
+print("Résultats RK2:")
+print(f"Pic de l'épidémie à t = {t_rk[np.argmax(M_rk)]} jours")
+print(f"Fin de l'épidémie à t = {t_rk[-1]} jours")
+print(f"Total infectés: {int(G_rk[-1] + M_rk[-1])}")
+
+print("\nRésultats Euler:")
+print(f"Pic de l'épidémie à t = {t_e[np.argmax(M_e)]} jours")
+print(f"Fin de l'épidémie à t = {t_e[-1]} jours")
+print(f"Total infectés: {int(G_e[-1] + M_e[-1])}")
+
+
