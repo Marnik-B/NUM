@@ -1,12 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Apr 12 15:55:58 2025
-
-@author: marni
-"""
-
-
-
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -14,7 +5,7 @@ import matplotlib.pyplot as plt
 N = 300
 alpha = 0.7
 beta = 0.4
-dt = 0.1
+dt = 0.1     #1.81 limite
 
 M0=1
 S0=N-M0
@@ -24,14 +15,11 @@ Y0=np.array([[S0],
             [G0],
             [M0]])
 
-A = np.array([[-alpha,0,0],
-              [0,0,beta],
-              [alpha,0,-beta]])
-
-
 def F(Y):
+    A = np.array([[-alpha,0,0],
+                  [0,0,beta],
+                  [alpha,0,-beta]])
     return A@Y
-    
 
 # Euler
 def euler(Y):
@@ -102,16 +90,17 @@ axs.set_xlabel("Temps (jours)")
 axs.set_ylabel("Nombre de sains")
 axs.legend()
 axs.grid()
-
 plt.show()
 
 # Résultats
 print("Résultats RK2:")
-print(f"Pic de l'épidémie à t = {t_rk[np.argmax(M_rk)]} jours")
+print(f"Pic de l'épidémie à t = {t_rk[np.argmax(M_rk)]} jours, avec {M_rk[np.argmax(M_rk)]} malades")
 print(f"Fin de l'épidémie à t = {t_rk[-1]} jours")
 print(f"Total infectés: {int(G_rk[-1] + M_rk[-1])}")
 
 print("\nRésultats Euler:")
-print(f"Pic de l'épidémie à t = {t_e[np.argmax(M_e)]} jours")
+print(f"Pic de l'épidémie à t = {t_e[np.argmax(M_e)]} jours, avec {M_e[np.argmax(M_e)]} malades")
 print(f"Fin de l'épidémie à t = {t_e[-1]} jours")
 print(f"Total infectés: {int(G_e[-1] + M_e[-1])}")
+
+
