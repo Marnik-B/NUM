@@ -60,3 +60,40 @@ plt.legend()
 plt.grid()
 plt.tight_layout()
 plt.show()
+
+
+M0_liste = [1, 10, 30,50]
+couleurs = ['blue', 'orange', 'green', 'red']
+
+plt.figure(figsize=(10, 6))
+
+i = 0  # indice manuel pour les couleurs
+while i < len(M0_liste):
+    M0 = M0_liste[i]
+    S0 = 300 - M0
+    G0 = 0
+
+    X_temp = np.zeros((n_max, 3))
+    T_temp = np.zeros(n_max)
+    X_temp[0, :] = [S0, M0, G0]
+
+    j = 0
+    while X_temp[j, 1] > 0.01 and j < n_max - 1:
+        pred = X_temp[j, :] + dt * f(X_temp[j, :])
+        X_temp[j+1, :] = X_temp[j, :] + dt / 2 * (f(X_temp[j, :]) + f(pred))
+        T_temp[j+1] = T_temp[j] + dt
+        j += 1
+
+    M_temp = X_temp[:j+1, 1]
+    T_temp = T_temp[:j+1]
+
+    plt.plot(T_temp, M_temp, label=M0, color=couleurs[i])
+    i += 1
+
+plt.xlabel("Temps (jours)")
+plt.ylabel("Nombre de malades")
+plt.title("Évolution de M(t) selon le nombre initial de malades M₀")
+plt.legend()
+plt.grid()
+plt.tight_layout()
+plt.show()
