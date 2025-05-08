@@ -1,0 +1,62 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Paramètres
+alpha = 0.8
+beta = 0.1
+dt = 0.1
+Tmax = 200
+n_max = int(Tmax / dt) + 1
+
+# Initialisation
+X = np.zeros((n_max, 3))  # colonnes : [S, M, G]
+T = np.zeros(n_max)
+X[0, :] = [299, 1, 0]  # S0, M0, G0
+t = 0
+i = 0
+
+# Fonction du système
+def f(X):
+    S, M, G = X
+    N = S + M + G
+    dS = -alpha * M / N * S
+    dM = alpha * M / N * S - beta * M
+    dG = beta * M
+    return np.array([dS, dM, dG])
+
+# Simulation
+while X[i, 1] > 0.01 and i < n_max - 1:
+    pred = X[i, :] + dt * f(X[i, :])
+    X[i+1, :] = X[i, :] + dt/2 * (f(X[i, :]) + f(pred))
+    T[i+1] = T[i] + dt
+    i += 1
+
+# Extraction des résultats
+X = X[:i+1, :]
+T = T[:i+1]
+S, M, G = X[:, 0], X[:, 1], X[:, 2]
+
+# Analyse
+t_pic = T[np.argmax(M)]
+m_pic = np.max(M)
+t_fin = T[-1]
+infectes = 299 - S[-1]  # S0 = 299
+
+# Affichage
+print("\n==== Résultats de l'épidémie ====")
+print(f"Pic de l’épidémie : t = {t_pic:.2f} jours avec {m_pic:.2f} malades")
+print(f"Fin de l’épidémie : t = {t_fin:.2f} jours (M < 0.01)")
+print(f"Total d’étudiants infectés : {infectes:.0f} sur 300")
+
+# Tracé
+plt.plot(T, S, label="Sains")
+plt.plot(T, M, label="Malades")
+plt.plot(T, G, label="Guéris")
+plt.axvline(t_pic, color='red', linestyle='--', label="Pic")
+plt.xlabel("Temps (jours)")
+plt.ylabel("Nombre d’étudiants")
+plt.title("Simulation d'une épidémie (schéma prédiction-correction)")
+plt.legend()
+plt.grid()
+plt.tight_layout()
+plt.show()
