@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 N = 300
 alpha = 0.7
 beta = 0.4
-dt = 0.1     #2.85 rayon de stabilité
+dt = 0.1     #2.85 rayon de stabilité = 2/0.4
 
 M0=1
 S0=N-M0
