@@ -1,0 +1,145 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri May 23 10:15:10 2025
+
+@author: yoanl
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Parameters
+N = 300
+alpha = 0.7
+beta = 0.4
+dt = 2    #2.85 rayon de stabilité = 2/0.4
+
+M0=1
+S0=N-M0
+G0=0
+t=0
+Y0=np.array([[S0],
+            [G0],
+            [M0]])
+
+B= np.array([[-alpha,0,0],
+                  [0,0,beta],
+                  [alpha,0,-beta]])
+
+
+def F(Y):
+    A = np.array([[-alpha,0,0],
+                  [0,0,beta],
+                  [alpha,0,-beta]])
+    return A@Y
+
+# Euler
+def euler(Y):
+    M = np.array([1])
+    S = np.array([N - M[0]])
+    G = np.array([0])
+    t = np.array([0])
+
+    while Y[2][-1] >= 0.01:
+        Y_next=Y+dt*F(Y)
+        Y=Y_next
+        t_next = t[-1] + dt
+
+        S=np.append(S,Y[0])
+        G=np.append(G,Y[1])
+        M=np.append(M,Y[2])
+        t=np.append(t,t_next)
+
+    return t, S, M, G
+
+# RK2
+def rk2(Y):
+    M = np.array([1])
+    S = np.array([N - M[0]])
+    G = np.array([0])
+    t = np.array([0])
+
+    while Y[2][-1] >= 0.01:
+        Y_next=Y+dt*F(Y+dt/2*F(Y))
+        Y=Y_next
+        
+        
+        t_next = t[-1] + dt
+
+
+        S=np.append(S,Y[0])
+        G=np.append(G,Y[1])
+        M=np.append(M,Y[2])
+        t=np.append(t,t_next)
+
+    return t,S,M,G
+
+def theta_schema (Y, theta):
+    M = np.array([1])
+    S = np.array([N - M[0]])
+    G = np.array([0])
+    t = np.array([0])
+    while Y[2][-1] >= 0.01:
+        Y_next = Y + dt*((1-theta)*F(Y)+theta*F(Y+dt/2*F(Y)))
+        Y=Y_next
+        t_next = t[-1] + dt
+        S=np.append(S,Y[0])
+        G=np.append(G,Y[1])
+        M=np.append(M,Y[2])
+        t=np.append(t,t_next)
+    return(t,S,M,G)  
+
+
+t_e, S_e, M_e, G_e = euler(Y0)
+t_rk, S_rk, M_rk, G_rk = rk2(Y0)
+
+
+nb_iteration = int(t/dt)
+theta = 0.5
+temps = np.linspace(0, len(t_e), nb_iteration+1)
+
+
+
+t_th, S_th, M_th, G_th= theta_schema(Y0, theta)
+
+
+
+fig, (axm,axg,axs) = plt.subplots(1,3,figsize = (15,4))
+axm.plot(t_e, M_e, label="Malades (Euler)", linestyle="--")
+axm.plot(t_rk, M_rk, label="Malades (RK2)", linestyle="-")
+axm.plot(t_th, M_th, label="Malades (Theta)", linestyle=":")
+axm.set_title("Malades Euler vs RK2")
+axm.set_xlabel("Temps (jours)")
+axm.set_ylabel("Nombre de malades")
+axm.legend()
+axm.grid()
+
+axg.plot(t_e, G_e, label="Guéris (Euler)", linestyle="--")
+axg.plot(t_rk, G_rk, label="Guéris (RK2)", linestyle="-")
+axg.plot(t_th, G_th, label="Guéris (Theta)", linestyle=":")
+axg.set_title("Guéris Euler vs RK2")
+axg.set_xlabel("Temps (jours)")
+axg.set_ylabel("Nombre de guéris")
+axg.legend()
+axg.grid()
+
+axs.plot(t_e, S_e, label="Sains (Euler)", linestyle="--")
+axs.plot(t_rk, S_rk, label="Sains (RK2)", linestyle="-")
+axs.plot(t_th, S_th, label="Sains (Theta)", linestyle=":")
+axs.set_title("Sains Euler vs RK2")
+axs.set_xlabel("Temps (jours)")
+axs.set_ylabel("Nombre de sains")
+axs.legend()
+axs.grid()
+plt.show()
+
+# Résultats
+print("Résultats RK2:")
+print(f"Pic de l'épidémie à t = {t_rk[np.argmax(M_rk)]} jours, avec {M_rk[np.argmax(M_rk)]} malades")
+print(f"Fin de l'épidémie à t = {t_rk[-1]} jours")
+print(f"Total infectés: {int(G_rk[-1] + M_rk[-1])}")
+
+print("\nRésultats Euler:")
+print(f"Pic de l'épidémie à t = {t_e[np.argmax(M_e)]} jours, avec {M_e[np.argmax(M_e)]} malades")
+print(f"Fin de l'épidémie à t = {t_e[-1]} jours")
+print(f"Total infectés: {int(G_e[-1] + M_e[-1])}")
